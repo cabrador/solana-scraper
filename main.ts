@@ -4,15 +4,13 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 
-
-
 import { sleep } from "@117/sleep";
 import * as dl from "jsr:@timepp/zero-config-deno-log";
 import logSymbols from "npm:log-symbols";
 
 async function createCSV(strings: string[], filePath: string): Promise<void> {
   // Join strings with ';' and add a newline at the end
-  const csvContent = strings.join(';') + '\n';
+  const csvContent = strings.join(";") + "\n";
 
   // Write the content to the file
   await Deno.writeTextFile(filePath, csvContent);
@@ -34,60 +32,77 @@ function incrementValue(map: Map<string, number>, key: string) {
  * @returns A promise that resolves to a list of unique public keys that interacted with the contract.
  */
 async function getInteractingAddresses(
-    connectionUrl: string,
-    contractPublicKey: string[],
+  connectionUrl: string,
+  contractPublicKey: string[],
 ): Promise<string[]> {
   const connection = new Connection(connectionUrl, "confirmed");
-  const contractKey = new PublicKey(contractPublicKey[0]);
-
-  console.info(
-    logSymbols.info,
-    "Fetching signatures for contract:" + contractKey.toString(),
-  );
-  // Fetch transaction signatures associated with the contract
-  const signatures = await connection.getSignaturesForAddress(contractKey, {
-    limit: 1, // How many transactions per fetch
-  });
-
   const uniqueAddresses = new Set<string>();
-  let currentBlockTime = 0;
-  // Fetch and parse each transaction to find interacting addresses
-  for (const signatureInfo of signatures) {
+  for (const contract of contractPublicKey) {
+    const contractKey = new PublicKey(contract);
+
     console.info(
       logSymbols.info,
-      "Fetching transaction: ",
-      signatureInfo.signature,
+      "Fetching signatures for contract:" + contractKey.toString(),
     );
+    // Fetch transaction signatures associated with the contract
+    const signatures = await connection.getSignaturesForAddress(contractKey, {
+      limit: 1000, // How many transactions per fetch
+    });
 
-    if (currentBlockTime !== signatureInfo.blockTime) {
+    let currentBlockTime = 0;
+    // Fetch and parse each transaction to find interacting addresses
+    for (const signatureInfo of signatures) {
+      console.info(
+        logSymbols.info,
+        "Fetching transaction: ",
+        signatureInfo.signature,
+      );
+
+      if (currentBlockTime !== signatureInfo.blockTime) {
+        console.info(
+          logSymbols.success,
+          "New block time!",
+          signatureInfo.blockTime,
+        );
+        currentBlockTime = signatureInfo.blockTime!;
+      }
+      let transaction: ParsedTransactionWithMeta | null;
+      try {
+        transaction = await connection
+          .getParsedTransaction(
+            signatureInfo.signature,
+            { "maxSupportedTransactionVersion": 0 },
+          );
+      } catch (error) {
+        console.error(
+          logSymbols.error,
+          "Error fetching transaction: ",
+          error,
+        );
+        // exit early if we get caught
+        return Array.from(uniqueAddresses);
+      }
+
+      if (!transaction) {
+        console.warn(logSymbols.warning, "Transaction not found");
+        continue;
+      }
+      if (!transaction.transaction.message.accountKeys) {
+        console.warn(logSymbols.warning, "Message not found");
+        continue;
+      }
+
+      // Add all account keys from the transaction to the set
+      transaction.transaction.message.accountKeys.forEach((account) => {
+        uniqueAddresses.add(account.pubkey.toString());
+      });
       console.info(
         logSymbols.success,
-        "New block time!",
-        signatureInfo.blockTime,
+        "Unique addresses found so far: ",
+        uniqueAddresses.size,
       );
-      currentBlockTime = signatureInfo.blockTime!;
+      await sleep(5000);
     }
-    const transaction: ParsedTransactionWithMeta | null = await connection
-      .getParsedTransaction(
-        signatureInfo.signature,
-        { "maxSupportedTransactionVersion": 0 },
-      );
-
-    if (!transaction) {
-      console.warn(logSymbols.warning, "Transaction not found");
-      continue;
-    }
-    if (!transaction.transaction.message.accountKeys) {
-      console.warn(logSymbols.warning, "Message not found");
-      continue;
-    }
-
-    // Add all account keys from the transaction to the set
-    transaction.transaction.message.accountKeys.forEach((account) => {
-      uniqueAddresses.add(account.pubkey.toString());
-    });
-    console.info(logSymbols.success, "Unique addresses found so far: ", uniqueAddresses.size);
-    await sleep(5000);
   }
 
   // Return the list of unique addresses
@@ -111,7 +126,7 @@ async function getInteractingAddresses(
       "Unique interacting addresses: ",
       addresses,
     );
-    await createCSV(addresses, CSVFilePath)
+    await createCSV(addresses, CSVFilePath);
   } catch (error) {
     console.error(
       logSymbols.error,
