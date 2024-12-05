@@ -74,7 +74,9 @@ async function getInteractingAddresses(
           error,
         );
         // sleep for a ten seconds on error
+        console.log(logSymbols.info, "Sleeping for 10 seconds");
         await sleep(10000)
+        console.log(logSymbols.info, "Continuing...");
         continue
         // return Array.from(uniqueAddresses);
       }
@@ -105,7 +107,7 @@ async function getInteractingAddresses(
         }
       });
 
-      await sleep(100);
+      await sleep(500);
     }
   }
 
