@@ -52,15 +52,9 @@ async function getInteractingAddresses(
     let currentBlockSlot = 0;
     // Fetch and parse each transaction to find interacting addresses
     for (const signatureInfo of signatures) {
-      console.info(
-        logSymbols.info,
-        "Fetching transaction: ",
-        signatureInfo.signature,
-      );
-
       if (currentBlockSlot != signatureInfo.slot) {
         console.info(
-          logSymbols.success,
+          logSymbols.info,
           "New block slot!",
           signatureInfo.slot,
         );
