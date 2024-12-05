@@ -79,8 +79,10 @@ async function getInteractingAddresses(
           "Error fetching transaction: ",
           error,
         );
-        // exit early if we get caught
-        return Array.from(uniqueAddresses);
+        // sleep for a ten seconds on error
+        await sleep(10000)
+        continue
+        // return Array.from(uniqueAddresses);
       }
 
       if (!transaction) {
@@ -109,7 +111,7 @@ async function getInteractingAddresses(
         }
       });
 
-      await sleep(5000);
+      await sleep(100);
     }
   }
 
@@ -118,14 +120,14 @@ async function getInteractingAddresses(
 }
 
 (async () => {
-  const rpcUrl = "https://api.mainnet-beta.solana.com";
+  const rpcUrl = "https://endpoints.omniatech.io/v1/sol/mainnet/public";
   const contracts = [
     "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
     "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
     "2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c",
     "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
   ];
-  const CSVFilePath = "addreses.csv";
+  const CSVFilePath = "addreses1.csv";
 
   try {
     const addresses = await getInteractingAddresses(rpcUrl, contracts);
