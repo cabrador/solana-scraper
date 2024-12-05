@@ -100,14 +100,10 @@ async function getInteractingAddresses(
                 logSymbols.success,
                 "Found new unique address: ",
                 account.pubkey.toString(),
+                uniqueAddresses.size+1,
             );
           }
           uniqueAddresses.add(account.pubkey.toString());
-          console.info(
-              logSymbols.info,
-              "Unique addresses found so far: ",
-              uniqueAddresses.size,
-          )
           return
         }
       });
