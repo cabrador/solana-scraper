@@ -95,14 +95,19 @@ async function getInteractingAddresses(
       // Add all account keys from the transaction to the set
       transaction.transaction.message.accountKeys.forEach((account) => {
         if (account.signer) {
+          if (!uniqueAddresses.has(account.pubkey.toString())) {
+            console.info(
+                logSymbols.success,
+                "Found new unique address: ",
+                account.pubkey.toString(),
+            );
+          }
           uniqueAddresses.add(account.pubkey.toString());
           console.info(
-              logSymbols.success,
-              "Found new unique address: ",
-              account.pubkey.toString(),
-              "\nUnique addresses found so far: ",
+              logSymbols.info,
+              "Unique addresses found so far: ",
               uniqueAddresses.size,
-          );
+          )
           return
         }
       });
