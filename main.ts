@@ -49,7 +49,7 @@ async function getInteractingAddresses(
       limit: 1000, // How many transactions per fetch
     });
 
-    let currentBlockTime = 0;
+    let currentBlockSlot = 0;
     // Fetch and parse each transaction to find interacting addresses
     for (const signatureInfo of signatures) {
       console.info(
@@ -58,13 +58,13 @@ async function getInteractingAddresses(
         signatureInfo.signature,
       );
 
-      if (currentBlockTime !== signatureInfo.blockTime) {
+      if (currentBlockSlot !== signatureInfo.slot) {
         console.info(
           logSymbols.success,
-          "New block time!",
-          signatureInfo.blockTime,
+          "New block slot!",
+          signatureInfo.slot,
         );
-        currentBlockTime = signatureInfo.blockTime!;
+        currentBlockSlot = signatureInfo.blockTime!;
       }
       let transaction: ParsedTransactionWithMeta | null;
       try {
