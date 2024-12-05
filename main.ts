@@ -94,7 +94,10 @@ async function getInteractingAddresses(
 
       // Add all account keys from the transaction to the set
       transaction.transaction.message.accountKeys.forEach((account) => {
-        uniqueAddresses.add(account.pubkey.toString());
+        if (account.signer) {
+          uniqueAddresses.add(account.pubkey.toString());
+          return
+        }
       });
       console.info(
         logSymbols.success,
