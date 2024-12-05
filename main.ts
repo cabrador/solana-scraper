@@ -100,6 +100,7 @@ async function getInteractingAddresses(
                 logSymbols.success,
                 "Found new unique address: ",
                 account.pubkey.toString(),
+                "\nTotal unique addresses: ",
                 uniqueAddresses.size+1,
             );
           }
