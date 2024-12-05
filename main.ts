@@ -58,13 +58,13 @@ async function getInteractingAddresses(
         signatureInfo.signature,
       );
 
-      if (currentBlockSlot !== signatureInfo.slot) {
+      if (currentBlockSlot != signatureInfo.slot) {
         console.info(
-          logSymbols.success,
+          logSymbols.info,
           "New block slot!",
           signatureInfo.slot,
         );
-        currentBlockSlot = signatureInfo.blockTime!;
+        currentBlockSlot = signatureInfo.slot!;
       }
       let transaction: ParsedTransactionWithMeta | null;
       try {
