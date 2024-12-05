@@ -60,7 +60,7 @@ async function getInteractingAddresses(
 
       if (currentBlockSlot != signatureInfo.slot) {
         console.info(
-          logSymbols.info,
+          logSymbols.success,
           "New block slot!",
           signatureInfo.slot,
         );
